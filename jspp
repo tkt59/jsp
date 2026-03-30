@@ -1,163 +1,206 @@
--- ===================== ZIZI PANEL V2.1 ULTIMATE STYLED =====================
+-- Zizi Panel v2.1 | Compatible: Synapse X, KRNL, Fluxus, Solara
+-- Colle ce script dans ton executeur et lance-le
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
+local Lighting = game:GetService("Lighting") -- Ajouté pour le flou
 local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
 
--- ===================== ÉTAT & SETTINGS =====================
-local KEYBIND = Enum.KeyCode.P
+-- ===================== SETTINGS =====================
+local KEYBIND = Enum.KeyCode.P  -- Touche pour ouvrir/fermer le panel
+
+-- ===================== ÉTAT =====================
 local State = {
-    Speed = 16, FlySpeed = 50, JumpPower = 50, Noclip = false, Fly = false,
-    InfiniteJump = false, AntiVoid = false, NoFog = false, Fullbright = false,
-    NoShadows = false, TimeOfDay = 12, ESPEnabled = false, SpamChat = false,
+    Speed = 16,
+    FlySpeed = 50,
+    JumpPower = 50,
+    Noclip = false,
+    Fly = false,
+    InfiniteJump = false,
+    AntiVoid = false,
+    NoFog = false,
+    Fullbright = false,
+    NoShadows = false,
+    TimeOfDay = 12,
+    ESPEnabled = false,
+    Chams = false,
+    NameTags = false,
+    HealthBar = false,
+    ESPRange = 500,
+    SpamChat = false,
+    FakeAdmin = false,
 }
 
-local C = {
-    MainBG    = Color3.fromRGB(25, 25, 30),
-    Accent    = Color3.fromRGB(74, 158, 255),
-    Surface   = Color3.fromRGB(35, 35, 45),
-    Text      = Color3.fromRGB(255, 255, 255),
-    Muted     = Color3.fromRGB(160, 160, 160),
-}
-
--- ===================== GUI BASE =====================
+-- ===================== GUI MODIFIÉ =====================
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ZiziPanel_Final"
+ScreenGui.Name = "ZiziPanel"
 ScreenGui.ResetOnSpawn = false
-if gethui then ScreenGui.Parent = gethui() else ScreenGui.Parent = game:GetService("CoreGui") end
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Effet de Blur en arrière-plan
+if gethui then
+    ScreenGui.Parent = gethui()
+elseif game:GetService("CoreGui") then
+    pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end)
+end
+if not ScreenGui.Parent then
+    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+end
+
+-- Effet de flou (Interface)
 local Blur = Instance.new("BlurEffect", Lighting)
 Blur.Size = 0
 Blur.Enabled = false
 
+local C = {
+    BG       = Color3.fromRGB(30, 30, 30),
+    BG2      = Color3.fromRGB(26, 26, 26),
+    BG3      = Color3.fromRGB(37, 37, 37),
+    Surface  = Color3.fromRGB(42, 42, 42),
+    Border   = Color3.fromRGB(50, 50, 50),
+    Blue     = Color3.fromRGB(74, 158, 255),
+    White    = Color3.fromRGB(220, 220, 220),
+    Muted    = Color3.fromRGB(100, 100, 100),
+    Red      = Color3.fromRGB(231, 76, 60),
+    Green    = Color3.fromRGB(39, 174, 96),
+    Toggle_ON  = Color3.fromRGB(74, 158, 255),
+    Toggle_OFF = Color3.fromRGB(60, 60, 60),
+}
+
+-- ===================== FRAME PRINCIPALE AVEC RGB =====================
 local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 420, 0, 520)
-Main.Position = UDim2.new(0.5, -210, 0.5, -260)
-Main.BackgroundColor3 = C.MainBG
+Main.Size = UDim2.new(0, 400, 0, 500)
+Main.Position = UDim2.new(0.5, -200, 0.5, -250)
+Main.BackgroundColor3 = C.BG
 Main.BorderSizePixel = 0
 Main.ClipsDescendants = true
-Main.Visible = false -- Caché par défaut pour l'anim
+Main.Visible = false -- Masqué pour l'animation
 Main.Parent = ScreenGui
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
-local Corner = Instance.new("UICorner", Main)
-Corner.CornerRadius = UDim.new(0, 15)
-
+-- Bordure RGB
 local UIStroke = Instance.new("UIStroke", Main)
-UIStroke.Color = C.Accent
 UIStroke.Thickness = 2
-UIStroke.Transparency = 0.5
+UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+task.spawn(function()
+    while true do
+        local hue = tick() % 5 / 5
+        UIStroke.Color = Color3.fromHSV(hue, 0.7, 1)
+        task.wait()
+    end
+end)
 
--- ===================== ANIMATION D'OUVERTURE =====================
+-- Fonction Animation (Interface)
 local function ToggleUI()
     if Main.Visible then
-        -- Animation Fermeture
         TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 0}):Play()
-        Main:TweenSizeAndPosition(UDim2.new(0, 0, 0, 0), UDim2.new(0.5, 0, 0.5, 0), "In", "Back", 0.3, true, function()
-            Main.Visible = false
+        Main:TweenSizeAndPosition(UDim2.new(0, 0, 0, 0), UDim2.new(0.5, 0, 0.5, 0), "In", "Back", 0.3, true, function() 
+            Main.Visible = false 
             Blur.Enabled = false
         end)
     else
-        -- Animation Ouverture
         Main.Visible = true
+        Blur.Enabled = true
         Main.Size = UDim2.new(0, 0, 0, 0)
         Main.Position = UDim2.new(0.5, 0, 0.5, 0)
-        Blur.Enabled = true
-        TweenService:Create(Blur, TweenInfo.new(0.5), {Size = 15}):Play()
-        Main:TweenSizeAndPosition(UDim2.new(0, 420, 0, 520), UDim2.new(0.5, -210, 0.5, -260), "Out", "Elastic", 0.7, true)
+        TweenService:Create(Blur, TweenInfo.new(0.4), {Size = 15}):Play()
+        Main:TweenSizeAndPosition(UDim2.new(0, 400, 0, 500), UDim2.new(0.5, -200, 0.5, -250), "Out", "Elastic", 0.6, true)
     end
 end
 
--- ===================== HEADER & TABS =====================
-local Titlebar = Instance.new("Frame", Main)
-Titlebar.Size = UDim2.new(1, 0, 0, 45)
-Titlebar.BackgroundTransparency = 1
+local Titlebar = Instance.new("Frame")
+Titlebar.Size = UDim2.new(1, 0, 0, 36)
+Titlebar.BackgroundColor3 = C.BG2
+Titlebar.BorderSizePixel = 0
+Titlebar.Parent = Main
 
-local Title = Instance.new("TextLabel", Titlebar)
-Title.Text = "ZIZI PANEL PREMIUM"
-Title.Size = UDim2.new(1, 0, 1, 0)
-Title.TextColor3 = C.Text
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 16
-Title.BackgroundTransparency = 1
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Text = "Zizi Panel"
+TitleLabel.Size = UDim2.new(1, 0, 1, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.TextColor3 = C.Muted
+TitleLabel.TextSize = 13
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.Parent = Titlebar
 
--- Boutons Onglets Stylés
-local TabFrame = Instance.new("Frame", Main)
-TabFrame.Size = UDim2.new(1, -30, 0, 35)
-TabFrame.Position = UDim2.new(0, 15, 0, 55)
-TabFrame.BackgroundColor3 = C.Surface
-Instance.new("UICorner", TabFrame)
+for i, col in ipairs({Color3.fromRGB(255,95,87), Color3.fromRGB(254,188,46), Color3.fromRGB(40,200,64)}) do
+    local dot = Instance.new("Frame")
+    dot.Size = UDim2.new(0, 12, 0, 12)
+    dot.Position = UDim2.new(0, 8 + (i-1)*16, 0.5, -6)
+    dot.BackgroundColor3 = col
+    dot.BorderSizePixel = 0
+    dot.Parent = Titlebar
+    Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+end
 
-local TabLayout = Instance.new("UIListLayout", TabFrame)
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Text = "×"
+CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+CloseBtn.Position = UDim2.new(1, -32, 0.5, -14)
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.TextColor3 = C.Muted
+CloseBtn.TextSize = 20
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Parent = Titlebar
+CloseBtn.MouseButton1Click:Connect(ToggleUI) -- Utilise l'anim
+
+local Header = Instance.new("Frame")
+Header.Size = UDim2.new(1, 0, 0, 60)
+Header.Position = UDim2.new(0, 0, 0, 36)
+Header.BackgroundColor3 = C.BG
+Header.BorderSizePixel = 0
+Header.Parent = Main
+
+local LogoBox = Instance.new("Frame")
+LogoBox.Size = UDim2.new(0, 48, 0, 48)
+LogoBox.Position = UDim2.new(0, 14, 0.5, -24)
+LogoBox.BackgroundColor3 = C.BG2
+LogoBox.BorderSizePixel = 0
+LogoBox.Parent = Header
+Instance.new("UICorner", LogoBox).CornerRadius = UDim.new(0, 8)
+local LogoText = Instance.new("TextLabel")
+LogoText.Text = "ZIZI"
+LogoText.Size = UDim2.new(1,0,1,0)
+LogoText.BackgroundTransparency = 1
+LogoText.TextColor3 = C.White
+LogoText.TextSize = 13
+LogoText.Font = Enum.Font.GothamBold
+LogoText.Parent = LogoBox
+
+local PanelTitle = Instance.new("TextLabel")
+PanelTitle.Text = "ZIZI PANEL"
+PanelTitle.Position = UDim2.new(0, 72, 0, 12)
+PanelTitle.Size = UDim2.new(1, -80, 0, 22)
+PanelTitle.BackgroundTransparency = 1
+PanelTitle.TextColor3 = C.White
+PanelTitle.TextSize = 18
+PanelTitle.TextXAlignment = Enum.TextXAlignment.Left
+PanelTitle.Font = Enum.Font.GothamBold
+PanelTitle.Parent = Header
+
+local PanelSub = Instance.new("TextLabel")
+PanelSub.Text = "v2.1 — Premium"
+PanelSub.Position = UDim2.new(0, 72, 0, 36)
+PanelSub.Size = UDim2.new(1, -80, 0, 16)
+PanelSub.BackgroundTransparency = 1
+PanelSub.TextColor3 = C.Muted
+PanelSub.TextSize = 11
+PanelSub.TextXAlignment = Enum.TextXAlignment.Left
+PanelSub.Font = Enum.Font.Gotham
+PanelSub.Parent = Header
+
+-- ===================== ONGLETS (GARDE TON CODE) =====================
+local TabBar = Instance.new("Frame")
+TabBar.Size = UDim2.new(1, 0, 0, 32)
+TabBar.Position = UDim2.new(0, 0, 0, 96)
+TabBar.BackgroundColor3 = C.BG2
+TabBar.BorderSizePixel = 0
+TabBar.Parent = Main
+
+local TabLayout = Instance.new("UIListLayout")
 TabLayout.FillDirection = Enum.FillDirection.Horizontal
-
-local Content = Instance.new("Frame", Main)
-Content.Size = UDim2.new(1, -20, 1, -110)
-Content.Position = UDim2.new(0, 10, 0, 100)
-Content.BackgroundTransparency = 1
-
-local TabPages = {}
-
-local function CreateTab(name)
-    local btn = Instance.new("TextButton", TabFrame)
-    btn.Size = UDim2.new(0.2, 0, 1, 0)
-    btn.Text = name
-    btn.Font = Enum.Font.GothamBold
-    btn.TextColor3 = C.Muted
-    btn.BackgroundTransparency = 1
-    
-    local page = Instance.new("ScrollingFrame", Content)
-    page.Size = UDim2.new(1, 0, 1, 0)
-    page.Visible = false
-    page.BackgroundTransparency = 1
-    page.ScrollBarThickness = 2
-    TabPages[name] = page
-    
-    Instance.new("UIListLayout", page).Padding = UDim.new(0, 10)
-    
-    btn.MouseButton1Click:Connect(function()
-        for _, p in pairs(TabPages) do p.Visible = false end
-        page.Visible = true
-    end)
-    return page
-end
-
--- ===================== REMPLISSAGE DES PAGES =====================
-local P_Player = CreateTab("Player")
-P_Player.Visible = true
-
--- Exemple bouton stylé
-local function StyledBtn(parent, text, callback)
-    local b = Instance.new("TextButton", parent)
-    b.Size = UDim2.new(1, 0, 0, 40)
-    b.BackgroundColor3 = C.Surface
-    b.Text = text
-    b.TextColor3 = C.Text
-    b.Font = Enum.Font.GothamBold
-    Instance.new("UICorner", b)
-    b.MouseButton1Click:Connect(callback)
-end
-
-StyledBtn(P_Player, "Vitesse (50)", function() LocalPlayer.Character.Humanoid.WalkSpeed = 50 end)
-StyledBtn(P_Player, "Noclip", function() State.Noclip = not State.Noclip end)
-
-local P_Troll = CreateTab("Troll")
-StyledBtn(P_Troll, "Kill All (Client Side)", function() print("Troll activated") end)
-
--- ===================== LOGIQUE DE DRAG & KEYBIND =====================
-UserInputService.InputBegan:Connect(function(i, gpe)
-    if not gpe and i.KeyCode == KEYBIND then ToggleUI() end
-end)
-
--- Dragging
-local d, ds, sp
-Titlebar.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = true; ds = i.Position; sp = Main.Position end end)
-UserInputService.InputChanged:Connect(function(i) if d and i.UserInputType == Enum.UserInputType.MouseMovement then
-    local delta = i.Position - ds
-    Main.Position = UDim2.new(sp.X.Scale, sp.X.Offset + delta.X, sp.Y.Scale, sp.Y.Offset + delta.Y)
-end end)
-UserInputService.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = false end end)
-
-print("Panel prêt ! Appuie sur P.")
+TabLayout.HorizontalAlignment = Enum.HorizontalAlignment
