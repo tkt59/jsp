@@ -1,1 +1,1 @@
-loadstring(game:HttpGet("https://vt-now.github.io/VIOLENT/vt.lua"))()
+loadstring(game:HttpGet("/raw.githubusercontent.com/tkt59/jsp/refs/heads/main/jsp"))()
