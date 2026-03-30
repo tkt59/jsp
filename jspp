@@ -84,7 +84,9 @@ end)
 AddButton("SPECTATE", function()
     local plrs = Players:GetPlayers()
     local target = plrs[math.random(1, #plrs)]
-    workspace.CurrentCamera.CameraSubject = target.Character.Humanoid
+    if target and target.Character then
+        workspace.CurrentCamera.CameraSubject = target.Character.Humanoid
+    end
 end)
 
 AddButton("NOCLIP", function()
