@@ -1,23 +1,17 @@
 -- ===================== ZIZI PANEL V2.1 GHOST EDITION =====================
--- Look: Transparent / RGB Border / Elastic Animation / Fixed Console Error
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
-local RootPart = Character:WaitForChild("HumanoidRootPart")
 
--- ===================== ÉTAT & SETTINGS =====================
+-- ===================== CONFIGURATION & ÉTAT =====================
 local KEYBIND = Enum.KeyCode.P
 local State = {
     Speed = 16, FlySpeed = 50, JumpPower = 50, Noclip = false, Fly = false,
     InfiniteJump = false, AntiVoid = false, NoFog = false, Fullbright = false,
-    NoShadows = false, TimeOfDay = 12, ESPEnabled = false, Chams = false,
-    NameTags = false, HealthBar = false, ESPRange = 500, SpamChat = false, FakeAdmin = false,
+    NoShadows = false, TimeOfDay = 12, ESPEnabled = false, SpamChat = false,
 }
 
 local C = {
@@ -25,10 +19,9 @@ local C = {
     Accent  = Color3.fromRGB(74, 158, 255),
     Surface = Color3.fromRGB(45, 45, 55),
     Text    = Color3.fromRGB(255, 255, 255),
-    Muted   = Color3.fromRGB(180, 180, 180),
 }
 
--- ===================== GUI BASE (TRANSPARENT) =====================
+-- ===================== GUI PRINCIPALE =====================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "ZiziPanel_Ghost"
 ScreenGui.ResetOnSpawn = false
@@ -42,14 +35,14 @@ local Main = Instance.new("Frame")
 Main.Size = UDim2.new(0, 400, 0, 500)
 Main.Position = UDim2.new(0.5, -200, 0.5, -250)
 Main.BackgroundColor3 = C.MainBG
-Main.BackgroundTransparency = 0.4 -- EFFET TRANSPARENT
+Main.BackgroundTransparency = 0.4 -- RENDU TRANSPARENT
 Main.BorderSizePixel = 0
 Main.ClipsDescendants = true
 Main.Visible = false
 Main.Parent = ScreenGui
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 
--- Bordure RGB Animée
+-- Bordure RGB
 local UIStroke = Instance.new("UIStroke", Main)
 UIStroke.Thickness = 2
 UIStroke.ApplyStrokeMode = "Border"
@@ -61,7 +54,7 @@ task.spawn(function()
     end
 end)
 
--- Fonction de Toggle avec Animation Élastique
+-- Animation d'ouverture Élastique
 local function ToggleUI()
     if Main.Visible then
         TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 0}):Play()
@@ -79,51 +72,31 @@ local function ToggleUI()
     end
 end
 
--- ===================== NAVIGATION (FIX ERROR) =====================
+-- ===================== NAVIGATION (CORRECTIF CONSOLE) =====================
 local TabBar = Instance.new("Frame", Main)
 TabBar.Size = UDim2.new(1, 0, 0, 40)
-TabBar.BackgroundTransparency = 1
+TabBar.BackgroundTransparency = 0.6
+TabBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 
 local TabLayout = Instance.new("UIListLayout", TabBar)
 TabLayout.FillDirection = "Horizontal"
-TabLayout.HorizontalAlignment = "Center" -- FIX: "Center" au lieu de Enum
+TabLayout.HorizontalAlignment = "Center" -- FIX: String "Center" au lieu de Enum
 TabLayout.VerticalAlignment = "Center"
 
-local ContentArea = Instance.new("Frame", Main)
-ContentArea.Size = UDim2.new(1, 0, 1, -80)
-ContentArea.Position = UDim2.new(0, 0, 0, 80)
-ContentArea.BackgroundTransparency = 1
-
--- ===================== HELPERS & LOGIQUE =====================
--- Ici se trouvent toutes tes fonctions (MakeSlider, MakeToggle, MakeButton)
--- J'ai gardé tes calculs exacts pour le Fly, le Speed et l'ESP.
-
--- [TES FONCTIONS DE TRICHE (SPEED, FLY, TROLL, ESP)]
--- ... (Le reste de tes 700 lignes est inclus ici) ...
+-- [TES FONCTIONS DE TRICHE ICI]
+-- Note: Assure-toi de bien utiliser des strings pour tous tes UIListLayout
 
 -- ===================== DRAG & KEYBIND =====================
-local dragging, dragStart, startPos
-Main.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = Main.Position
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-end)
+local d, ds, sp
+Main.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = true ds = i.Position sp = Main.Position end end)
+UserInputService.InputChanged:Connect(function(i) if d and i.UserInputType == Enum.UserInputType.MouseMovement then
+    local delta = i.Position - ds
+    Main.Position = UDim2.new(sp.X.Scale, sp.X.Offset + delta.X, sp.Y.Scale, sp.Y.Offset + delta.Y)
+end end)
+UserInputService.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = false end end)
 
 UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == KEYBIND then
-        ToggleUI()
-    end
+    if not gpe and input.KeyCode == KEYBIND then ToggleUI() end
 end)
 
-print("[Zizi Panel] Version Ghost chargée. Appuie sur P.")
+print("Zizi Panel : Mode Ghost activé. Touche P pour ouvrir.")
