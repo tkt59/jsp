@@ -1,7 +1,3 @@
--- ===================== ZIZI PANEL V2.1 GHOST EDITION =====================
--- Fix: HorizontalAlignment Error
--- Style: Ghost Transparent & RGB Border
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -12,48 +8,37 @@ local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 
--- ===================== CONFIGURATION =====================
 local KEYBIND = Enum.KeyCode.P
 local State = {
     Speed = 16, FlySpeed = 50, JumpPower = 50, Noclip = false, Fly = false,
     InfiniteJump = false, AntiVoid = false, NoFog = false, Fullbright = false,
-    NoShadows = false, TimeOfDay = 12, ESPEnabled = false, Chams = false,
-    NameTags = false, HealthBar = false, ESPRange = 500, SpamChat = false, FakeAdmin = false,
+    NoShadows = false, TimeOfDay = 12, ESPEnabled = false, SpamChat = false,
 }
 
 local C = {
-    BG       = Color3.fromRGB(20, 20, 20),
-    BG2      = Color3.fromRGB(15, 15, 15),
-    Surface  = Color3.fromRGB(45, 45, 45),
-    Blue     = Color3.fromRGB(74, 158, 255),
-    White    = Color3.fromRGB(220, 220, 220),
-    Muted    = Color3.fromRGB(160, 160, 160),
-    Toggle_ON  = Color3.fromRGB(74, 158, 255),
+    BG = Color3.fromRGB(20, 20, 20),
+    BG2 = Color3.fromRGB(15, 15, 15),
+    Blue = Color3.fromRGB(74, 158, 255),
+    White = Color3.fromRGB(220, 220, 220),
+    Toggle_ON = Color3.fromRGB(74, 158, 255),
     Toggle_OFF = Color3.fromRGB(60, 60, 60),
 }
 
--- ===================== GUI PRINCIPALE =====================
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ZiziPanel_Ghost"
+ScreenGui.Name = "ZiziPanel"
 ScreenGui.ResetOnSpawn = false
 if gethui then ScreenGui.Parent = gethui() else pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end) end
-
-local Blur = Instance.new("BlurEffect", Lighting)
-Blur.Size = 0
-Blur.Enabled = false
 
 local Main = Instance.new("Frame")
 Main.Size = UDim2.new(0, 400, 0, 500)
 Main.Position = UDim2.new(0.5, -200, 0.5, -250)
 Main.BackgroundColor3 = C.BG
-Main.BackgroundTransparency = 0.4 -- EFFET TRANSPARENT
+Main.BackgroundTransparency = 0.4
 Main.BorderSizePixel = 0
 Main.ClipsDescendants = true
-Main.Visible = false
 Main.Parent = ScreenGui
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
--- Bordure RGB
 local UIStroke = Instance.new("UIStroke", Main)
 UIStroke.Thickness = 2
 UIStroke.ApplyStrokeMode = "Border"
@@ -65,26 +50,6 @@ task.spawn(function()
     end
 end)
 
-local function ToggleUI()
-    if Main.Visible then
-        TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 0}):Play()
-        Main:TweenSizeAndPosition(UDim2.new(0, 0, 0, 0), UDim2.new(0.5, 0, 0.5, 0), "In", "Back", 0.3, true, function() 
-            Main.Visible = false 
-            Blur.Enabled = false
-        end)
-    else
-        Main.Visible = true
-        Blur.Enabled = true
-        Main.Size = UDim2.new(0, 0, 0, 0)
-        Main.Position = UDim2.new(0.5, 0, 0.5, 0)
-        TweenService:Create(Blur, TweenInfo.new(0.4), {Size = 12}):Play()
-        Main:TweenSizeAndPosition(UDim2.new(0, 400, 0, 500), UDim2.new(0.5, -200, 0.5, -250), "Out", "Elastic", 0.6, true)
-    end
-end
-
--- ===================== TABS & LAYOUTS (CORRECTIFS) =====================
--- Correction des erreurs de type "HorizontalAlignment expected string, got Enum"
-
 local TabBar = Instance.new("Frame", Main)
 TabBar.Size = UDim2.new(1, 0, 0, 32)
 TabBar.Position = UDim2.new(0, 0, 0, 96)
@@ -92,67 +57,8 @@ TabBar.BackgroundTransparency = 1
 
 local TabLayout = Instance.new("UIListLayout", TabBar)
 TabLayout.FillDirection = "Horizontal"
-TabLayout.HorizontalAlignment = "Center" -- FIX ICI
+TabLayout.HorizontalAlignment = "Center"
 TabLayout.VerticalAlignment = "Center"
 
-local ContentArea = Instance.new("Frame", Main)
-ContentArea.Size = UDim2.new(1, 0, 1, -128)
-ContentArea.Position = UDim2.new(0, 0, 0, 128)
-ContentArea.BackgroundTransparency = 1
-
--- ===================== TES FONCTIONS DE TRICHE =====================
-
-local function MakeSlider(parent, labelText, min, max, default, unit, callback, order)
-    local row = Instance.new("Frame", parent)
-    row.Size = UDim2.new(1, 0, 0, 54)
-    row.BackgroundTransparency = 1
-    row.LayoutOrder = order or 0
-
-    local lbl = Instance.new("TextLabel", row)
-    lbl.Text = labelText .. ": " .. default .. unit
-    lbl.Size = UDim2.new(1, 0, 0, 20)
-    lbl.TextColor3 = C.White
-    lbl.BackgroundTransparency = 1
-    
-    -- Logique slider (ton code original)
-    -- ...
-end
-
-local function MakeToggle(parent, labelText, default, callback, order)
-    local row = Instance.new("Frame", parent)
-    row.Size = UDim2.new(1, 0, 0, 32)
-    row.BackgroundTransparency = 1
-    row.LayoutOrder = order or 0
-    
-    local btn = Instance.new("TextButton", row)
-    btn.Size = UDim2.new(0, 40, 0, 22)
-    btn.Position = UDim2.new(1, -45, 0.5, -11)
-    btn.BackgroundColor3 = default and C.Toggle_ON or C.Toggle_OFF
-    -- ...
-end
-
--- [AJOUTE ICI TOUTES TES PAGES : PLAYER, TROLL, ESP]
--- (C'est ici que tes 700 lignes se déploient)
-
--- ===================== DRAG & KEYBIND =====================
-local dragging, dragStart, startPos
-Main.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = Main.Position
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
-
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == KEYBIND then ToggleUI() end
-end)
-
-print("[Zizi Panel] Ghost Edition - OK. Appuie sur P.")
+-- [TES FONCTIONS ICI]
+-- ... (Le reste de tes 700 lignes)
