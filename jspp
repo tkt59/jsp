@@ -1,64 +1,138 @@
+-- ===================== ZIZI PANEL V3.0 GHOST =====================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
-local RootPart = Character:WaitForChild("HumanoidRootPart")
 
-local KEYBIND = Enum.KeyCode.P
-local State = {
-    Speed = 16, FlySpeed = 50, JumpPower = 50, Noclip = false, Fly = false,
-    InfiniteJump = false, AntiVoid = false, NoFog = false, Fullbright = false,
-    NoShadows = false, TimeOfDay = 12, ESPEnabled = false, SpamChat = false,
-}
+-- Fix pour ton exécuteur (Strings au lieu d'Enums pour la console)
+local ALIGN_CENTER = "Center"
 
-local C = {
-    BG = Color3.fromRGB(20, 20, 20),
-    BG2 = Color3.fromRGB(15, 15, 15),
-    Blue = Color3.fromRGB(74, 158, 255),
-    White = Color3.fromRGB(220, 220, 220),
-    Toggle_ON = Color3.fromRGB(74, 158, 255),
-    Toggle_OFF = Color3.fromRGB(60, 60, 60),
-}
-
+-- ===================== INTERFACE TRANSPARENTE =====================
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ZiziPanel"
-ScreenGui.ResetOnSpawn = false
-if gethui then ScreenGui.Parent = gethui() else pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end) end
+ScreenGui.Name = "ZiziPanel_Ghost"
+ScreenGui.Parent = (gethui and gethui()) or game:GetService("CoreGui")
 
 local Main = Instance.new("Frame")
 Main.Size = UDim2.new(0, 400, 0, 500)
 Main.Position = UDim2.new(0.5, -200, 0.5, -250)
-Main.BackgroundColor3 = C.BG
-Main.BackgroundTransparency = 0.4
+Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Main.BackgroundTransparency = 0.4 -- EFFET GHOST
 Main.BorderSizePixel = 0
-Main.ClipsDescendants = true
 Main.Parent = ScreenGui
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 
+-- Bordure RGB
 local UIStroke = Instance.new("UIStroke", Main)
 UIStroke.Thickness = 2
 UIStroke.ApplyStrokeMode = "Border"
 task.spawn(function()
     while true do
-        local h = tick() % 5 / 5
-        UIStroke.Color = Color3.fromHSV(h, 0.7, 1)
+        UIStroke.Color = Color3.fromHSV(tick() % 5 / 5, 0.7, 1)
         task.wait()
     end
 end)
 
-local TabBar = Instance.new("Frame", Main)
-TabBar.Size = UDim2.new(1, 0, 0, 32)
-TabBar.Position = UDim2.new(0, 0, 0, 96)
-TabBar.BackgroundTransparency = 1
+-- Prénom du Panel
+local Title = Instance.new("TextLabel", Main)
+Title.Text = "ZIZI PANEL"
+Title.Size = UDim2.new(1, 0, 0, 50)
+Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.TextSize = 22
+Title.Font = "GothamBold"
 
-local TabLayout = Instance.new("UIListLayout", TabBar)
-TabLayout.FillDirection = "Horizontal"
-TabLayout.HorizontalAlignment = "Center"
-TabLayout.VerticalAlignment = "Center"
+local Container = Instance.new("ScrollingFrame", Main)
+Container.Size = UDim2.new(1, -20, 1, -70)
+Container.Position = UDim2.new(0, 10, 0, 60)
+Container.BackgroundTransparency = 1
+Container.CanvasSize = UDim2.new(0, 0, 1.5, 0)
+Container.ScrollBarThickness = 2
 
--- [TES FONCTIONS ICI]
--- ... (Le reste de tes 700 lignes)
+local Layout = Instance.new("UIListLayout", Container)
+Layout.Padding = UDim.new(0, 8)
+Layout.HorizontalAlignment = ALIGN_CENTER
+
+-- ===================== FONCTIONS & BOUTONS = --
+
+local function AddButton(name, func)
+    local btn = Instance.new("TextButton", Container)
+    btn.Text = name
+    btn.Size = UDim2.new(0.9, 0, 0, 35)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.BackgroundTransparency = 0.2
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = "GothamMedium"
+    btn.TextSize = 14
+    Instance.new("UICorner", btn)
+    btn.MouseButton1Click:Connect(func)
+end
+
+-- Fly & Noclip States
+local flying = false
+local noclip = false
+
+AddButton("FLY (V)", function()
+    flying = not flying
+    print("Fly: " .. tostring(flying))
+end)
+
+AddButton("ESP PLAYERS", function()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local h = p.Character:FindFirstChild("Highlight") or Instance.new("Highlight", p.Character)
+            h.FillColor = Color3.new(1, 0, 0)
+        end
+    end
+end)
+
+AddButton("TP TO RANDOM PLAYER", function()
+    local plrs = Players:GetPlayers()
+    local randomPlayer = plrs[math.random(1, #plrs)]
+    if randomPlayer and randomPlayer.Character then
+        LocalPlayer.Character:MoveTo(randomPlayer.Character.HumanoidRootPart.Position)
+    end
+end)
+
+AddButton("SPECTATE", function()
+    local target = Players:GetPlayers()[math.random(1, #Players:GetPlayers())]
+    workspace.CurrentCamera.CameraSubject = target.Character.Humanoid
+end)
+
+AddButton("NOCLIP", function()
+    noclip = not noclip
+end)
+
+AddButton("TOUTES LES ANIMATIONS", function()
+    -- Charge une animation de danse au hasard
+    local anim = Instance.new("Animation")
+    anim.AnimationId = "rbxassetid://3333499508" 
+    LocalPlayer.Character.Humanoid:LoadAnimation(anim):Play()
+end)
+
+-- ===================== BOUCLES (FLY/NOCLIP) = --
+RunService.Stepped:Connect(function()
+    if noclip then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end
+end)
+
+-- Drag & Toggle (Touche P)
+local dragging, dragStart, startPos
+Main.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true dragStart = input.Position startPos = Main.Position
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+
+UserInputService.InputBegan:Connect(function(i, g)
+    if not g and i.KeyCode == Enum.KeyCode.P then Main.Visible = not Main.Visible end
+end)
