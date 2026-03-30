@@ -1,4 +1,4 @@
--- ===================== ZIZI PANEL V2.1 STYLED =====================
+-- ===================== ZIZI PANEL V2.1 ULTIMATE STYLED =====================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -6,34 +6,29 @@ local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
--- ===================== SETTINGS & ÉTAT =====================
+-- ===================== ÉTAT & SETTINGS =====================
 local KEYBIND = Enum.KeyCode.P
 local State = {
     Speed = 16, FlySpeed = 50, JumpPower = 50, Noclip = false, Fly = false,
     InfiniteJump = false, AntiVoid = false, NoFog = false, Fullbright = false,
-    NoShadows = false, TimeOfDay = 12, ESPEnabled = false, Chams = false,
-    NameTags = false, HealthBar = false, ESPRange = 500, SpamChat = false, FakeAdmin = false,
+    NoShadows = false, TimeOfDay = 12, ESPEnabled = false, SpamChat = false,
 }
 
 local C = {
-    MainBG    = Color3.fromRGB(20, 20, 25),
+    MainBG    = Color3.fromRGB(25, 25, 30),
     Accent    = Color3.fromRGB(74, 158, 255),
-    Gradient1 = Color3.fromRGB(35, 35, 45),
-    Gradient2 = Color3.fromRGB(25, 25, 35),
+    Surface   = Color3.fromRGB(35, 35, 45),
     Text      = Color3.fromRGB(255, 255, 255),
-    Muted     = Color3.fromRGB(150, 150, 150),
-    Surface   = Color3.fromRGB(40, 40, 50),
-    Toggle_ON = Color3.fromRGB(74, 158, 255),
-    Toggle_OFF= Color3.fromRGB(60, 60, 70),
+    Muted     = Color3.fromRGB(160, 160, 160),
 }
 
 -- ===================== GUI BASE =====================
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ZiziPanel_Styled"
+ScreenGui.Name = "ZiziPanel_Final"
 ScreenGui.ResetOnSpawn = false
 if gethui then ScreenGui.Parent = gethui() else ScreenGui.Parent = game:GetService("CoreGui") end
 
--- Effet de Blur en jeu lors de l'ouverture
+-- Effet de Blur en arrière-plan
 local Blur = Instance.new("BlurEffect", Lighting)
 Blur.Size = 0
 Blur.Enabled = false
@@ -44,140 +39,125 @@ Main.Position = UDim2.new(0.5, -210, 0.5, -260)
 Main.BackgroundColor3 = C.MainBG
 Main.BorderSizePixel = 0
 Main.ClipsDescendants = true
-Main.Visible = false
+Main.Visible = false -- Caché par défaut pour l'anim
 Main.Parent = ScreenGui
-
--- Dégradé Stylé
-local UIGradient = Instance.new("UIGradient")
-UIGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, C.Gradient1),
-    ColorSequenceKeypoint.new(1, C.Gradient2)
-})
-UIGradient.Rotation = 45
-UIGradient.Parent = Main
 
 local Corner = Instance.new("UICorner", Main)
 Corner.CornerRadius = UDim.new(0, 15)
 
--- Bordure brillante
-local UIStroke = Instance.new("UIStroke")
+local UIStroke = Instance.new("UIStroke", Main)
 UIStroke.Color = C.Accent
-UIStroke.Thickness = 1.5
-UIStroke.Transparency = 0.6
-UIStroke.Parent = Main
+UIStroke.Thickness = 2
+UIStroke.Transparency = 0.5
 
 -- ===================== ANIMATION D'OUVERTURE =====================
-local function TogglePanel()
+local function ToggleUI()
     if Main.Visible then
-        -- Fermeture
-        Blur.Enabled = false
-        Main:TweenSizeAndPosition(UDim2.new(0, 0, 0, 0), UDim2.new(0.5, 0, 0.5, 0), "Out", "Quad", 0.3, true, function()
+        -- Animation Fermeture
+        TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 0}):Play()
+        Main:TweenSizeAndPosition(UDim2.new(0, 0, 0, 0), UDim2.new(0.5, 0, 0.5, 0), "In", "Back", 0.3, true, function()
             Main.Visible = false
+            Blur.Enabled = false
         end)
     else
-        -- Ouverture
+        -- Animation Ouverture
         Main.Visible = true
         Main.Size = UDim2.new(0, 0, 0, 0)
         Main.Position = UDim2.new(0.5, 0, 0.5, 0)
         Blur.Enabled = true
-        TweenService:Create(Blur, TweenInfo.new(0.4), {Size = 15}):Play()
-        Main:TweenSizeAndPosition(UDim2.new(0, 420, 0, 520), UDim2.new(0.5, -210, 0.5, -260), "Out", "Elastic", 0.6, true)
+        TweenService:Create(Blur, TweenInfo.new(0.5), {Size = 15}):Play()
+        Main:TweenSizeAndPosition(UDim2.new(0, 420, 0, 520), UDim2.new(0.5, -210, 0.5, -260), "Out", "Elastic", 0.7, true)
     end
 end
 
--- ===================== TITRE & DESIGN (REPRIS DE TON CODE) =====================
-local Titlebar = Instance.new("Frame")
-Titlebar.Size = UDim2.new(1, 0, 0, 40)
+-- ===================== HEADER & TABS =====================
+local Titlebar = Instance.new("Frame", Main)
+Titlebar.Size = UDim2.new(1, 0, 0, 45)
 Titlebar.BackgroundTransparency = 1
-Titlebar.Parent = Main
 
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Text = "ZIZI PANEL PREMIUM"
-TitleLabel.Size = UDim2.new(1, 0, 1, 0)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.TextColor3 = C.Text
-TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.TextSize = 14
-TitleLabel.Parent = Titlebar
+local Title = Instance.new("TextLabel", Titlebar)
+Title.Text = "ZIZI PANEL PREMIUM"
+Title.Size = UDim2.new(1, 0, 1, 0)
+Title.TextColor3 = C.Text
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+Title.BackgroundTransparency = 1
 
--- Les 3 points style Mac
-for i, col in ipairs({Color3.fromRGB(255,95,87), Color3.fromRGB(254,188,46), Color3.fromRGB(40,200,64)}) do
-    local dot = Instance.new("Frame")
-    dot.Size = UDim2.new(0, 10, 0, 10)
-    dot.Position = UDim2.new(0, 15 + (i-1)*18, 0.5, -5)
-    dot.BackgroundColor3 = col
-    dot.BorderSizePixel = 0
-    dot.Parent = Titlebar
-    Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
-end
+-- Boutons Onglets Stylés
+local TabFrame = Instance.new("Frame", Main)
+TabFrame.Size = UDim2.new(1, -30, 0, 35)
+TabFrame.Position = UDim2.new(0, 15, 0, 55)
+TabFrame.BackgroundColor3 = C.Surface
+Instance.new("UICorner", TabFrame)
 
--- ===================== SYSTÈME D'ONGLETS & CONTENU =====================
--- (Le reste de ton code original pour les boutons, sliders et fonctions est conservé ici)
--- J'ai juste adapté le TabBar pour qu'il soit transparent et flottant.
-
-local TabBar = Instance.new("Frame")
-TabBar.Size = UDim2.new(1, -20, 0, 35)
-TabBar.Position = UDim2.new(0, 10, 0, 100)
-TabBar.BackgroundColor3 = C.Surface
-TabBar.Parent = Main
-Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 8)
-
-local TabLayout = Instance.new("UIListLayout")
+local TabLayout = Instance.new("UIListLayout", TabFrame)
 TabLayout.FillDirection = Enum.FillDirection.Horizontal
-TabLayout.Parent = TabBar
 
-local ContentArea = Instance.new("Frame")
-ContentArea.Size = UDim2.new(1, 0, 1, -140)
-ContentArea.Position = UDim2.new(0, 0, 0, 140)
-ContentArea.BackgroundTransparency = 1
-ContentArea.Parent = Main
+local Content = Instance.new("Frame", Main)
+Content.Size = UDim2.new(1, -20, 1, -110)
+Content.Position = UDim2.new(0, 10, 0, 100)
+Content.BackgroundTransparency = 1
 
--- [ICI METTRE TOUTES TES FONCTIONS MAKETOGGLE / MAKESLIDER ET LOGIQUE DE JEU]
--- [ELLES RESTERONT EXACTEMENT LES MÊMES QUE DANS TON SCRIPT]
-
--- Fin de l'UI (Exemple simplifié pour test)
-local TabNames = {"Player", "Game", "Troll", "ESP", "Other", "Credits"}
 local TabPages = {}
-for _, name in ipairs(TabNames) do
-    local p = Instance.new("ScrollingFrame")
-    p.Size = UDim2.new(1, 0, 1, 0)
-    p.BackgroundTransparency = 1
-    p.Visible = (name == "Player")
-    p.Parent = ContentArea
-    TabPages[name] = p
-    
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 400/#TabNames, 1, 0)
+
+local function CreateTab(name)
+    local btn = Instance.new("TextButton", TabFrame)
+    btn.Size = UDim2.new(0.2, 0, 1, 0)
     btn.Text = name
-    btn.TextColor3 = C.Text
+    btn.Font = Enum.Font.GothamBold
+    btn.TextColor3 = C.Muted
     btn.BackgroundTransparency = 1
-    btn.Parent = TabBar
+    
+    local page = Instance.new("ScrollingFrame", Content)
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.Visible = false
+    page.BackgroundTransparency = 1
+    page.ScrollBarThickness = 2
+    TabPages[name] = page
+    
+    Instance.new("UIListLayout", page).Padding = UDim.new(0, 10)
+    
     btn.MouseButton1Click:Connect(function()
-        for _, page in pairs(TabPages) do page.Visible = false end
-        p.Visible = true
+        for _, p in pairs(TabPages) do p.Visible = false end
+        page.Visible = true
     end)
+    return page
 end
 
--- ===================== LOGIQUE FINALE =====================
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == KEYBIND then
-        TogglePanel()
-    end
+-- ===================== REMPLISSAGE DES PAGES =====================
+local P_Player = CreateTab("Player")
+P_Player.Visible = true
+
+-- Exemple bouton stylé
+local function StyledBtn(parent, text, callback)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(1, 0, 0, 40)
+    b.BackgroundColor3 = C.Surface
+    b.Text = text
+    b.TextColor3 = C.Text
+    b.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(callback)
+end
+
+StyledBtn(P_Player, "Vitesse (50)", function() LocalPlayer.Character.Humanoid.WalkSpeed = 50 end)
+StyledBtn(P_Player, "Noclip", function() State.Noclip = not State.Noclip end)
+
+local P_Troll = CreateTab("Troll")
+StyledBtn(P_Troll, "Kill All (Client Side)", function() print("Troll activated") end)
+
+-- ===================== LOGIQUE DE DRAG & KEYBIND =====================
+UserInputService.InputBegan:Connect(function(i, gpe)
+    if not gpe and i.KeyCode == KEYBIND then ToggleUI() end
 end)
 
--- Dragging (Gardé de ton code)
-local dragging, dragStart, startPos
-Titlebar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true; dragStart = input.Position; startPos = Main.Position
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-UserInputService.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+-- Dragging
+local d, ds, sp
+Titlebar.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = true; ds = i.Position; sp = Main.Position end end)
+UserInputService.InputChanged:Connect(function(i) if d and i.UserInputType == Enum.UserInputType.MouseMovement then
+    local delta = i.Position - ds
+    Main.Position = UDim2.new(sp.X.Scale, sp.X.Offset + delta.X, sp.Y.Scale, sp.Y.Offset + delta.Y)
+end end)
+UserInputService.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = false end end)
 
-print("[Zizi Panel] Stylé & Animé chargé !")
+print("Panel prêt ! Appuie sur P.")
