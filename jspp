@@ -1,4 +1,3 @@
-loadstring(game:HttpGet("/raw.githubusercontent.com/tkt59/jsp/refs/heads/main/jsp"))()
 -- Zizi Panel v2.1 | Compatible: Synapse X, KRNL, Fluxus, Solara
 -- Colle ce script dans ton executeur et lance-le
 
